@@ -18,16 +18,22 @@ jobs:
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v2
     
-    dependency-scan:
-        name: Dependency Scan
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v2          
-            - name: Run Snyk Scan
-              uses: snyk/actions/python@master
-              env:
-                SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    trivy_dependency-scan:
+      name: Scan Dependencies with Trivy
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout Code
+          uses: actions/checkout@v2
+        - name: Install Trivy
+          run: |
+            sudo apt-get update -y
+            sudo apt-get install -y wget
+            wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_linux_amd64.tar.gz
+            tar -xvf trivy_linux_amd64.tar.gz
+            sudo mv trivy /usr/local/bin/
+        - name: Run Trivy on Dependencies
+          run: |
+            trivy fs --severity HIGH,CRITICAL --exit-code 1 --no-progress --format table app/
     
     container-security:
         name: Docker Image Security Scan
