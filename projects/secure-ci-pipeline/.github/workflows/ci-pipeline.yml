@@ -2,7 +2,7 @@ name: Secure CI/CD Pipeline
 
 on:
     push:
-        branches: [ main ]
+        branches: [ secure-cicd-pipeline ]
 
 jobs:
     lint-and-test:
