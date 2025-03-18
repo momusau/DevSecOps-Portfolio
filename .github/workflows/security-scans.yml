@@ -35,7 +35,7 @@ jobs:
             sudo mv trivy /usr/local/bin/
         - name: Run Trivy on Dependencies
           run: |
-            trivy fs --severity HIGH,CRITICAL --exit-code 1 --no-progress --format table app/
+            trivy fs --severity HIGH,CRITICAL --exit-code 1 --no-progress --format table projects/secure-ci-pipeline/tests/app/
     
     container-security:
         name: Docker Image Security Scan
@@ -44,7 +44,7 @@ jobs:
           - name: Checkout code
             uses: actions/checkout@v2
           - name: Build docker image
-            run: docker build -t security-test-app:latest .
+            run: docker build -t security-test-app:latest ./projects/secure-ci-pipeline/
           - name: Run Trivy Scan
             run: docker run --rm -v $PWD:/app aquasec/trivy image --exit-code 1 security-test-app:latest
     
