@@ -1,0 +1,52 @@
+name: Security Scans
+
+on:
+    pull_request:
+        branches: [ main ]
+
+jobs:
+    static-analysis:
+        name: Static Code Analysis
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2           
+            - name: Initialize CodeQL
+              uses: github/codeql-action/init@v2
+              with:
+                languages: python         
+            - name: Perform CodeQL Analysis
+              uses: github/codeql-action/analyze@v2
+    
+    dependency-scan:
+        name: Dependency Scan
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2          
+            - name: Run Snyk Scan
+              uses: snyk/actions/python@master
+              env:
+                SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    
+    container-security:
+        name: Docker Image Security Scan
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v2
+          - name: Build docker image
+            run: docker build -t security-test-app:latest .
+          - name: Run Trivy Scan
+            run: docker run --rm -v $PWD:/app aquasec/trivy image --exit-code 1 security-test-app:latest
+    
+    terraform-security:
+      name: Terraform Security Scan
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v2
+        - name: Install Checkov
+          run: pip install checkov
+        - name: Run Checkov on Terraform Code
+          run: checkov -d terraform/ --quiet --soft-fail
