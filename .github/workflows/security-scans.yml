@@ -19,17 +19,6 @@ jobs:
                 languages: python         
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v2
-    
-    container-security:
-        name: Docker Image Security Scan
-        runs-on: ubuntu-latest
-        steps:
-          - name: Checkout code
-            uses: actions/checkout@v2
-          - name: Build docker image
-            run: docker build -t security-test-app:latest ./projects/secure-ci-pipeline/
-          - name: Run Trivy Scan
-            run: docker run --rm -v $PWD:/app aquasec/trivy image --exit-code 1 security-test-app:latest
 
     trivy_dependency-scan:
       name: Scan Dependencies with Trivy
@@ -37,6 +26,8 @@ jobs:
       steps:
         - name: Checkout Code
           uses: actions/checkout@v2
+        - name: Build docker image
+          run: docker build -t security-test-app:latest ./projects/secure-ci-pipeline/
         - name: Run Trivy Scanner
           uses: aquasecurity/trivy-action@0.28.0
           with:
