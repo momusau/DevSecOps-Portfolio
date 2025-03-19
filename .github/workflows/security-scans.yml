@@ -12,11 +12,11 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
-              uses: actions/checkout@v2           
+              uses: actions/checkout@v2
             - name: Initialize CodeQL
               uses: github/codeql-action/init@v2
               with:
-                languages: python         
+                languages: python
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v2
 
