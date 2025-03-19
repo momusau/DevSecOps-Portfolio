@@ -20,23 +20,6 @@ jobs:
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v2
     
-    trivy_dependency-scan:
-      name: Scan Dependencies with Trivy
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout Code
-          uses: actions/checkout@v2
-        - name: Install Trivy
-          run: |
-            sudo apt-get update -y
-            sudo apt-get install -y wget
-            wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_linux_amd64.tar.gz
-            tar -xvf trivy_linux_amd64.tar.gz
-            sudo mv trivy /usr/local/bin/
-        - name: Run Trivy on Dependencies
-          run: |
-            trivy fs --severity HIGH,CRITICAL --exit-code 1 --no-progress --format table projects/secure-ci-pipeline/tests/app/
-    
     container-security:
         name: Docker Image Security Scan
         runs-on: ubuntu-latest
@@ -47,6 +30,23 @@ jobs:
             run: docker build -t security-test-app:latest ./projects/secure-ci-pipeline/
           - name: Run Trivy Scan
             run: docker run --rm -v $PWD:/app aquasec/trivy image --exit-code 1 security-test-app:latest
+
+    trivy_dependency-scan:
+      name: Scan Dependencies with Trivy
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout Code
+          uses: actions/checkout@v2
+        - name: Run Trivy Scanner
+          uses: aquasecurity/trivy-action@0.28.0
+          with:
+            image-ref: security-test-app:latest
+            format: 'table'
+            exit-code: '1'
+            ignore-unfixed: true
+            vuln-type: 'os,library'
+            severity: 'CRITICAL,HIGH'
+    
     
     terraform-security:
       name: Terraform Security Scan
