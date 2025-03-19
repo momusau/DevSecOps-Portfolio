@@ -1,0 +1,7 @@
+services:
+  app:
+    build:
+      dockerfile: ./Dockerfile
+    container_name: secure-ci-test-app
+    ports:
+      - "5000:5000"
