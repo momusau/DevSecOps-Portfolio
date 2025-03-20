@@ -24,7 +24,7 @@ jobs:
               run: pip install -r projects/secure-ci-pipeline/app/requirements.txt
 
             - name: Run Linter
-              run: flake8 src/
+              run: flake8 projects/secure-ci-pipeline/app
 
             - name: Run Unit Tests
               run: pytest ./projects/secure-ci-pipeline/tests/
