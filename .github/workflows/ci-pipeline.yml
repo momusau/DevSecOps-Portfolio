@@ -27,7 +27,7 @@ jobs:
               run: flake8 projects/secure-ci-pipeline/app
 
             - name: Run Unit Tests
-              run: python3 -m pytest ./projects/secure-ci-pipeline/tests/
+              run: pytest ./projects/secure-ci-pipeline/tests/
     
     build-and-push:
         name: Build and Push Docker Image
