@@ -1,5 +1,13 @@
 name: Secure CI/CD Pipeline
 
+env:
+  AZURE_CONTAINER_REGISTRY:
+  PROJECT_NAME:
+  RESOURCE_GROUP:
+  CLUSTER_NAME:
+  REGISTRY_URL:
+  CHART_PATH:
+
 on:
     push:
         branches: [ secure-cicd-pipeline ]
@@ -11,12 +19,15 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v2
+
             - name: Install dependencies
-              run: pip install -r requirements.txt
+              run: pip install -r projects/secure-ci-pipeline/app/requirements.txt
+
             - name: Run Linter
               run: flake8 src/
+
             - name: Run Unit Tests
-              run: pytest tests/
+              run: pytest ./projects/secure-ci-pipeline/tests/
     
     build-and-push:
         name: Build and Push Docker Image
@@ -25,27 +36,60 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v2
+
             - name: Build Docker Image
-              run: docker build -t security-test-app .
-            - name: Login to DockerHub
-              run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+              run: docker build -t security-test-app ./projects/secure-ci-pipeline/
+
+            - name: Login to Azure
+              uses: docker/login-action@v3
+              with:
+                registry: ${{ secrets.ACR_REGISTRY }}
+                username: ${{ secrets.ACR_USERNAME }}
+                password: ${{ secrets.ACR_PASSWORD }} 
+
             - name: Tag and Push Image
               run: |
-                docker tag security-test-app:latest "${{ secrets.DOCKERHUB_USERNAME }}"/security-test-app:latest
-                docker push "${{ secrets.DOCKERHUB_USERNAME }}"/security-test-app:latest
+                docker tag security-test-app:latest "${{ secrets.ACR_REGISTRY }}"/security-test-app:latest
+                docker push "${{ secrets.ACR_REGISTRY }}"security-test-app:latest
     
-    deploy:
-        name: Deploy to Kubernetes
-        runs-on: ubuntu-latest
-        needs: build-and-push
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v2
-            - name: Setup Kubectl
-              uses: azure/setup-kubectl@v3
-              with:
-                version: 'latest'
-            - name: Deploy to Kubernetes
-              run: |
-                kubectl apply -f k8s/deployment.yaml
-                kubectl rollout status deployment/security-test-app
+    # deploy:
+    #     name: Deploy to Kubernetes
+    #     runs-on: ubuntu-latest
+    #     needs: build-and-push
+    #     steps:
+    #         - name: Login to DockerHub
+    #           uses: docker/login-action@v3
+    #           with:
+    #             registry: ${{ ACR_REGISTRY }}
+    #             username: ${{ ACR_USERNAME }}
+    #             password: ${{ ACR_PASSWORD }}
+            
+            # - name: Setup Kubectl
+            #   uses: azure/setup-kubectl@v3
+            #   with:
+            #     version: 'latest'
+
+            # - name: Create Kubernetes Secret
+            #   uses: Azure/k8s-create-secret@v4
+            #   with:
+            #     container-registry-url: dockerhub.io
+            #     container-registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
+            #     container-registry-password: ${{ secrets.DOCKERHUB_PASSWORD }}
+            #     secret-name: security-app-secret
+
+            # - name: Deploy
+            #   uses: Azure/k8s-deploy@v5
+            #   with:
+            #     action: deploy
+            #     manifests: |
+            #        projects/secure-ci-pipeline/k8s/deployment.yaml
+            #     images: |
+            #       "${{ secrets.DOCKERHUB_USERNAME }}"/security-test-app:latest
+            #     imagepullsecrets: |
+            #       security-app-secret
+            # - name: Checkout code
+            #   uses: actions/checkout@v2
+            # - name: Deploy to Kubernetes
+            #   run: |
+            #     kubectl apply -f k8s/deployment.yaml
+            #     kubectl rollout status deployment/security-test-app

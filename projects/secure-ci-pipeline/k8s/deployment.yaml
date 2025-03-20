@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: security-test-app
+spec:
+  selector:
+    matchLabels:
+      app: security-test-app
+  template:
+    metadata:
+      labels:
+        app: security-test-app
+    spec:
+      containers:
+      - name: security-test-app
+        image: security-test-app:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 5000
