@@ -5,8 +5,7 @@ metadata:
 spec:
   selector:
     app: security-test-app
-  type: NodePort
+  type: LoadBalancer
   ports:
   - port: 5000
     targetPort: 5000
-    nodePort: 30007

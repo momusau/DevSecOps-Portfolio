@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: security-test-app
-        image: security-test-app:latest
+        image: DOCKER_IMAGE
         resources:
           limits:
             memory: "128Mi"
