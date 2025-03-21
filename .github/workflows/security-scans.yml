@@ -2,7 +2,7 @@ name: Security Pipeline
 
 on: 
   push:
-    branches: [ secure-cicd-pipeline ]
+    branches: [ default ]
 
 jobs:
     static-analysis:
