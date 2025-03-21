@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: security-test-app
+spec:
+  selector:
+    app: security-test-app
+  type: LoadBalancer
+  ports:
+  - port: 5000
+    targetPort: 5000

@@ -1,0 +1,72 @@
+name: Secure CI/CD Pipeline
+
+env:
+  ECR_REPOSITORY: security-test-app-repo
+  EKS_CLUSTER_NAME: security-test-app
+  AWS_REGION: us-east-2
+
+on:
+    workflow_run:
+      workflows: ["Security Pipeline"]
+      types:
+        - completed
+
+jobs:
+    lint-and-test:
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        name: Lint Code and Run Unit Tests
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Install dependencies
+              run: pip install -r projects/secure-ci-pipeline/app/requirements.txt
+
+            - name: Run Linter
+              run: flake8 projects/secure-ci-pipeline/app
+
+            - name: Run Unit Tests
+              run: pytest ./projects/secure-ci-pipeline/tests/
+    
+    deploy-to-eks:
+      if: ${{ github.event.workflow_run.conclusion == 'success' }}
+      name: Deploy to EKS
+      runs-on: ubuntu-latest
+      steps:
+        - name: Set short git commit SHA
+          id: commit
+          uses: prompt/actions-commit-hash@v2
+
+        - name: Configure credentials
+          uses: aws-actions/configure-aws-credentials@v1
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ env.AWS_REGION }}
+        
+        - name: Login to ECR
+          id: login-ecr
+          uses: aws-actions/amazon-ecr-login@v1
+
+        - name: Checkout code
+          uses: actions/checkout@v2
+
+        - name: Build Docker Image
+          env:
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            IMAGE_TAG: ${{ steps.commit.outputs.short }}
+          run: |
+            docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./projects/secure-ci-pipeline/Dockerfile ./projects/secure-ci-pipeline/
+            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        
+        - name: Update kube config
+          run: aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+          
+        - name: Deploy to EKS
+          env:
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            IMAGE_TAG: ${{ steps.commit.outputs.short }}
+          run: |
+            sed -i.bak "s|DOCKER_IMAGE|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" ./projects/secure-ci-pipeline/k8s/deployment.yaml && \
+            kubectl apply -f ./projects/secure-ci-pipeline/k8s

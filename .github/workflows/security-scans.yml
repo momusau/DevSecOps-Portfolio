@@ -1,0 +1,48 @@
+name: Security Pipeline
+
+on: 
+  push:
+    branches: [ secure-cicd-pipeline ]
+
+jobs:
+    static-analysis:
+        name: Static Code Analysis
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+            - name: Initialize CodeQL
+              uses: github/codeql-action/init@v2
+              with:
+                languages: python
+            - name: Perform CodeQL Analysis
+              uses: github/codeql-action/analyze@v2
+
+    trivy_dependency-scan:
+      name: Scan Dependencies with Trivy
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout Code
+          uses: actions/checkout@v2
+        - name: Build docker image
+          run: docker build -t security-test-app:latest ./projects/secure-ci-pipeline/
+        - name: Run Trivy Scanner
+          uses: aquasecurity/trivy-action@0.28.0
+          with:
+            image-ref: security-test-app:latest
+            format: 'table'
+            exit-code: '1'
+            ignore-unfixed: true
+            vuln-type: 'os,library'
+            severity: 'CRITICAL,HIGH'
+
+    terraform-security:
+      name: Terraform Security Scan
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v2
+        - name: Install Checkov
+          run: pip install checkov
+        - name: Run Checkov on Terraform Code
+          run: checkov -d terraform/ --quiet --soft-fail
