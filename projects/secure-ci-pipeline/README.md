@@ -8,9 +8,10 @@ This project demonstrates a **secure CI/CD pipeline** that integrates:
 
 The purpose of this project is to demostrate, in a very small simple scale, how a team might incorporate some security best practices into their development/deployment cycles. This allows for a security-first approach to development and allows the user(s) to be notified early in their development of potential security risks that may come up during a more formal security investigation such as a Pentest.
 
+This repository will run and deploy a python app to Amazon EKS; the assumption is that the cluster is already up and running and the secrets have been created in GitHub Actions.
+
 ## Tech Stack
 - GitHub Actions
-- Terraform
 - AWS
 - Docker, Kubernetes
 

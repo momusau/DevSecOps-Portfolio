@@ -22,8 +22,3 @@ Hi, I'm Mo, a DevSecOps Engineer with expertise in AWS, Linux, and CI/CD. This p
 - **Scripting:** Bash, Python
 - **IaC:** Terraform, Ansible
 - **Container Security:** Docker, Kubernetes, Kube-bench
-
-## Connect With Me
-- GitHub: [Your GitHub Profile]
-- LinkedIn: [Your LinkedIn Profile]
-- Personal Website: [Your Portfolio Website] (if available)
