@@ -30,6 +30,10 @@ jobs:
       name: Deploy to EKS
       runs-on: ubuntu-latest
       steps:
+        - name: Set short git commit SHA
+          id: commit
+          uses: prompt/actions-commit-hash@v2
+
         - name: Configure credentials
           uses: aws-actions/configure-aws-credentials@v1
           with:
