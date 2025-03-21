@@ -6,11 +6,12 @@ COPY app/requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app .
+COPY . .
+COPY tests .
 
 EXPOSE 5000
 
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
-CMD ["python", "app.py"]
+CMD ["python", "app/app.py"]
