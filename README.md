@@ -1,7 +1,7 @@
 # DevSecOps Portfolio
 
 ## About Me
-Hi, I'm Mo, a DevSecOps Engineer with expertise in AWS, Linux, and CI/CD. This portfolio showcases my hands-on work in automation, security, and cloud infrastructure.
+Hello! I'm Mo, a DevSecOps Engineer with expertise in AWS, Linux, and CI/CD. This portfolio showcases my hands-on work in automation, security, and cloud infrastructure.
 
 ## Featured Projects
 ### 1️⃣ Secure CI/CD Pipeline
