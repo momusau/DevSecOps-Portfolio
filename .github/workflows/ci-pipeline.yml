@@ -6,8 +6,10 @@ env:
   AWS_REGION: us-east-2
 
 on:
-    push:
-        branches: [ secure-cicd-pipeline ]
+    workflow_run:
+      workflows: ["Security Pipeline"]
+      types:
+        - completed
 
 jobs:
     lint-and-test:
